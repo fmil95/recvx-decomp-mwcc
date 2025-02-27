@@ -1,0 +1,54 @@
+
+#pragma precompile_target "MSLHeaders.PS2.pch"
+
+
+#include <iosfwd>
+// Support
+#include <exception>
+#include <new>
+#include <limits>
+#include <typeinfo>
+// Diagnostics
+#include <stdexcept>
+// Iterators
+#include <iterator>
+// Utilities
+#include <functional>
+#include <memory>
+#include <utility>
+// Algorithms
+#include <algorithm>
+// Strings
+#include <string>
+// Containers
+#include <bitset>
+#include <deque>
+#include <list>
+#include <map>
+#include <set>
+#include <vector>
+#include <queue>
+#include <stack>
+// Localization
+#include <locale>
+// Input/Output
+#include <ios>
+#include <streambuf>
+#include <istream>
+#include <ostream>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <sstream>
+// Numerics
+#include <complex>
+#include <numeric>
+#include <valarray>
+// Extensions
+//  #include <hashfun.h>
+//  #include <hashmap.h>
+//  #include <hashmmap.h>
+//  #include <hashmset.h>
+//  #include <hashset.h>
+//  #include <hashtbl.h>
+//  #include <slist.h>

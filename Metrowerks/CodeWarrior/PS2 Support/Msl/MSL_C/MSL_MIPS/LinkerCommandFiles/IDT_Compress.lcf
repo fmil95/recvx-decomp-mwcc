@@ -1,0 +1,146 @@
+#
+#	Linker command file for IDT board using the COMPRESS feature
+#
+#
+
+MEMORY {
+	
+	# The LENGTH parameter is the maximum size allocated for 
+	# that segment of memory.  If the LENGTH is 0, the 
+	# linker will use as much of memory as needed even if it
+	# overflows on the next segment.
+	
+	# Memory area where the execution of the program is going to 
+	# start.  The code here cannot be compressed.  The boot code is
+	# responsible for all the board initialization and expanding the 
+	# code from ROM to RAM.
+	
+	.textBOOT (RX)  : ORIGIN = 0xa0020000,       LENGTH = 0x00020000
+	.textRAM  (RWX) : ORIGIN = 0xa0040000,		 LENGTH = 0, COMPRESS
+	.data	  (RW)  : ORIGIN = AFTER(.textRAM),  LENGTH = 0
+	
+}
+
+
+SECTIONS {
+
+	# Create the .textBOOT segment.  Check the overlay tab of 
+	# the project file to see which files are in the BOOT group.
+	
+	..boot_code :
+	{
+		GROUP(BOOT)	(.text)
+		GROUP(BOOT)	(.rodata)
+		. = ALIGN(4);	# Make sure the ROM address is word aligned
+	} > .textBOOT
+	
+
+	__ROMAddress = .;
+	__RAMAddress = ADDR(.textRAM);	# Pass that to the runtime
+		
+	# Use the * convention for file names.  Files and ELF sections
+	# that have been previously written will not be re-written.
+	# In this example we put the compressed code, just after the
+	# .textBOOT section
+	
+	..compressed_code : AT (__ROMAddress)
+	{
+		_ftext = .;
+		*	(.init)
+		*	(.text)			 
+		_etext = .;
+	
+	
+		#
+		# This part is only needed for MIPS-16 support	
+		# 
+			
+		_ftext16 = .;
+		*	(.text16)			 
+		_etext16 = .;
+		
+		# End of MIPS-16 support
+
+
+		# Include the .rodata and all the read only sections inside 
+		# the code segment.
+
+		. = ALIGN(16);
+		*	(.rodata)
+
+
+		#
+		# C++ related sections
+		#
+		
+		. = ALIGN(4);
+		*	(.vtables)
+
+		. = ALIGN(4);
+		__static_init = .;
+		*	(.ctor)
+		__static_init_end = .;
+
+		__exception_table_start__ = .;
+		EXCEPTION			# Only needed in C++
+		__exception_table_end__ = .;
+		
+		*	(.exception)
+		
+		# End of C++ support
+	} > .textRAM
+
+
+	# SIZEOF(..compress_code) represent the size of the segment before
+	# compression.  
+	
+	__RAMLength = SIZEOF(..compressed_code);
+
+	..data : 
+	{
+		_fdata = .;
+		. = ALIGN(16);
+		*	(.data)
+
+
+		# The .sbss section MUST follow the .sdata section and 
+		# _gp must point 32K inside the .sdata section.  This 
+		# is required by the ABI.  Note _gp is the only symbol
+		# known to the linker.  Don not change the name.
+	
+	  	. = ALIGN(16);
+		_fsdata = .;
+		_gp = _fsdata + 0x00007ff0;
+		
+		LITERAL
+
+	  	. = ALIGN(16);
+		*	(.sdata)
+
+		. = ALIGN(16);
+		_fsbss = .;
+		*	(.sbss)
+		*	(SCOMMON)
+		*	(.scommon)		
+		_esbss = .;
+
+		. = ALIGN(16);
+		_fbss = .;
+		*	(.bss)
+		*	(COMMON)
+		_ebss = .;	
+	} > .data
+
+	_end = .;
+	
+	# Allocate some space for the stack.  The stack grows from 
+	# high addresses to low addresses.  Note that it is OK to 
+	# write over the ..tmp section as long as it is done after
+	# the calls to all the static initializers
+
+	_stack_addr = . + 0x20000;
+	_stack_addr = (_stack_addr + 15) & ~15;
+	
+	_heap_addr = _stack_addr;			# This is used by MSL
+	_heap_end = _heap_addr + 400*1024;	
+}

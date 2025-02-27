@@ -1,0 +1,211 @@
+       Metrowerks Standard Library Directory Reorganization
+			May 21, 1999
+
+
+The Metrowerks Standard Library has been reorganized as follows:
+
+MSL
+	(MacOS_Build_Scripts)
+		68K Scripts
+		PPC Scripts
+		x86 Scripts
+	MSL_C
+		MSL_Common
+			Include
+			Src
+		MSL_MacOS
+			Include
+			Lib
+				68K
+				PPC
+			Project
+				68K
+				PPC
+			Src
+				(WASTE)
+		MSL_Win32
+			Include
+			Lib
+				x86
+			Project
+				x86
+			Src
+		MSL_x86
+			AMD_K63D_NOW
+	MSL_C++
+		MSL_Common
+			Include
+			Src
+		MSL_Precompiled_Headers
+			Project
+			Src
+		MSL_MacOS
+			Lib
+				68K
+				PPC
+			Project
+				68K
+				PPC
+		MSL_Win32
+			Lib
+				x86
+			Project
+				x86
+	MSL_Misc
+	MSL_Pascal (see separate release notes in MSL_Pascal_Tech_Notes)
+	MSL_Release_Notes
+	MSL_Tech_Notes
+	
+
+What has changed:
+
+*  Public Includes and Private Includes for the MSL_C library
+   have been combined into one directory named "Include".
+    
+*  The directory names no longer contain spaces.  MSL C is now
+   called "MSL_C".  MSL C++ is now called "MSL_C++".  MSL Mac
+   is now called "MSL_MacOS", and MSL Win32 is now "MSL_Win32".
+     
+*  Subdirectories within the platform directories have been
+   added to further dileneate architectures.  For example,
+   under MSL_MacOS Project and Lib directories, two directories
+   (68K and PPC) have been added to indicate files determined
+   for a specific architecture.  MSL_Win32 likewise has an "x86"
+   directory.  MSL_Win32 includes the WinCE API, so additional
+   platforms supporting WinCE will be placed under the MSL_Win32
+   directory for releases supporting WinCE. 
+
+*  "Metrowerks Standard Library" has been renamed to MSL.
+
+*  The compiled libraries are now placed in the "Lib" directory
+   for each architecture.  The Bin directory has been removed.
+     
+*  The project files for each architecture are now located in
+   the "Project" directory for each architecture.
+     
+*  The Precompiled Headers have moved under MSL_C++ to a
+   directory named "MSL_Precompiled_Headers".  The precompiled
+   header source files and resultant compiled headers are placed
+   in "Src" and the project file is found in "Project" within
+   the "MSL_Precompiled_Headers" directory.
+     
+     
+Questions and Answers:
+
+Q:  Why did you reorganize the library in the first place?
+
+A:  This is not something we undertook lightly, but the problem
+    we're solving is that CodeWarrior is being ported to many
+    different platforms with directory name requirements - path
+    length and inability to handle spaces.  In order to manage a
+    single source base that ports across all the platforms we
+    now support, this was the only viable solution.  
+
+Q:  How will this affect my own project files?
+
+A:  Your projects will have to know about the new "MSL" directory
+    and where the MSL libraries are now found.  The "Bin" directory
+    has been removed and replaced by "Lib" and "Project".  These
+    directories are now found with the platform they support.  Your
+    access paths to "Metrowerks Standard Library" must now change
+    to "MSL".  We are supplying a project converter to do this for
+    you.  It will look for "Metrowerks Standard Library" and change
+    the name to "MSL".  It will truncate any existing path beyond
+    MSL.  All files of unique names will automatically be found in
+    the MSL heirarchy.  We know of no performance issues at this
+    time with this renaming.
+    
+    *  If you have any directories or files you have added to
+       the Metrowerks Standard Library directory, you will have
+       to manually add this path back in if, and only if, you
+       have file names of the same names found in MSL.  For
+       example, you may have a directory named (My Includes) which
+       replace some of the MSL files - say, stdio.h and stdlib.h.
+       The project converter will simply truncate all directories
+       following "MSL" - you will then have to go back and add
+       (My Includes) to your access path.  If, on the other hand, 
+       you have your own directory that does NOT contain duplicate 
+       file names, you will have to do nothing.  
+       
+    *  The name "Metrowerks Standard Library" has been retired.
+       Don't add a directory in the CodeWarrior heirarchy with
+       that name - it will always get converted to MSL.
+       
+    *  If your source file includes a path name like
+       <sys/stat.h>, you will have to add the root path to
+       the include directory back into your access paths.  So
+       you will end up with two access paths instead of just
+       the one top level MSL path:
+           {Compiler}:MSL
+           {Compiler}:MSL/MSL_C/MSL_Common/Include
+       In other words, you must add the path to the Include
+       directory where the sys directory now resides.  For this
+       release, the usual <sys/> directory is found in
+       MSL/MSL_C/MSL_Common/Include - it used to be located
+       directly under "MSL Common" in previous releases.
+
+    *  If you use SIOUX (WASTE), you will need to add the (WASTE)
+       path back into your access path: 
+          MSL/MSL_C/MSL_MacOS/Src/(WASTE)
+       in order to find the header files use by WASTE.  Note that 
+       the IDE project converter will NOT be adding this path back 
+       in; this path will have to be hand edited in each target 
+       using it in all your projects.
+
+    *  Please also note that MSL is compiler relative.  If you have 
+       multiple MSL's that you are compiling against, you will have 
+       to ensure that MSL is project relative according to the MSL 
+       you are working with.
+
+Q:  How will this work with various IDE's?
+
+    Once you open your project with the Pro5 IDE, you won't be
+    be able to go back to a previous version.  The project will
+    have already been converted by the new IDE.  Once it's been
+    converted, it will not need to be converted again.  If you
+    were to install this new MSL under an earlier version of
+    the IDE, you would simply open your project file and change
+    your access path from "Metrowerks Standard Library" to MSL.
+    Remove duplicate paths.  You do not need to have access paths
+    to various components of MSL - one simple path (compiler
+    relative) to MSL will suffice (with the exception of the 
+    <include/sys> path if you're using stat.h - see note above
+    about naming the full path of the include directory where the
+    sys directory is now located).  You will need to convert each
+    target's access paths accordingly.
+
+Q:  Are you going to change the library names?
+
+A:  No.  On the platforms where the name was a problem, a new
+    library name was created.  This does not apply to desktop
+    (win32 and MacOS) platforms - new library names were created
+    for new platforms.  This will not be a concern for existing
+    libraries.
+
+We wish to make this as simple and unobtrusive as possible for
+everyone.  Please, if you have any questions or problems, do not
+hesitate to bring the matter to our attention.  We must change the
+directory names, so please supply suggestions that help us move
+forward and keep you moving as well.
+
+========================================================================
+Contacting Metrowerks
+========================================================================
+
+For bug reports, technical questions, and suggestions, please use the
+forms in the Release Notes folder on the CD, and send them to
+
+support@metrowerks.com
+
+See the CodeWarrior on the Nets document in the Release Notes folder for
+more contact information, including a list of Internet newsgroups, 
+online services, and patch and update sites.
+
+========================================================================
+
+Metrowerks Corporation
+$Date: 1999/12/23 19:49:41 $ 
+$Revision: 1.6.4.1 $ 
+$NoKeywords: $ 
+
+   

@@ -1,0 +1,7 @@
+#ifndef __climits__
+#define __climits__
+#define  LLONG_MIN    LONG_LONG_MIN
+#define  LLONG_MAX    LONG_LONG_MAX
+#define  ULLONG_MAX	  ULONG_LONG_MAX
+#include <limits.h>
+#endif

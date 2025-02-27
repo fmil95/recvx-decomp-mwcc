@@ -1,0 +1,106 @@
+#
+#	Linker command file for IDT board
+#
+#
+
+MEMORY {
+	
+	# The LENGTH parameter is the maximum size allocated for 
+	# that segment of memory.  If the LENGTH is 0, the 
+	# linker will use as much of memory as needed even if it
+	# overflows on the next segment.
+	
+	.text	(RX) :	ORIGIN = 0xa0800000,   LENGTH = 0
+	.data	(RW) :	ORIGIN = AFTER(.text), LENGTH = 0
+	
+}
+
+SECTIONS {
+
+	..code :
+	{
+		_ftext = .;
+		*	(.init)
+		*	(.text)			 
+		_etext = .;
+	
+		# Include the .rodata and all the read only sections inside 
+		# the code segment.
+
+		. = ALIGN(16);
+		*	(.rodata)
+
+
+		############################################################
+		# C++ related sections
+		############################################################
+		
+		. = ALIGN(4);
+		*	(.vtables)
+
+		. = ALIGN(4);
+		__static_init = .;
+		*	(.ctor)
+		__static_init_end = .;
+		WRITEW 0;
+
+		__exception_table_start__ = .;
+		EXCEPTION			# Only needed in C++
+		__exception_table_end__ = .;
+		
+		*	(.exception)
+		
+		# End of C++ support
+				
+	} > .text
+
+
+	..data : 
+	{
+		_fdata = .;
+		. = ALIGN(16);
+		*	(.data)
+
+
+		# The .sbss section MUST follow the .sdata section and 
+		# _gp must point 32K inside the .sdata section.  This 
+		# is required by the ABI.  Note _gp is the only symbol
+		# known to the linker.  Don not change the name.
+	
+	  	. = ALIGN(16);
+		_fsdata = .;
+		_gp = _fsdata + 0x00008000;
+		
+		LITERAL
+
+	  	. = ALIGN(16);
+		*	(.sdata)
+
+		. = ALIGN(16);
+		_fsbss = .;
+		*	(.sbss)
+		*	(SCOMMON)
+		*	(.scommon)		
+		_esbss = .;
+
+		. = ALIGN(16);
+		_fbss = .;
+		*	(.bss)
+		*	(COMMON)
+		_ebss = .;	
+
+	} > .data
+
+	_end = .;
+	
+	# Allocate some space for the stack.  The stack grows from 
+	# high addresses to low addresses.  Note that it is OK to 
+	# write over the ..tmp section as long as it is done after
+	# the calls to all the static initializers
+
+	_stack_addr = . + 0x20000;
+	_stack_addr = (_stack_addr + 15) & ~15;
+	
+	_heap_addr = _stack_addr;			# This is used by MSL
+	_heap_end = _heap_addr + 400*1024;	
+}

@@ -1,0 +1,189 @@
+MEMORY {	
+	############################################################
+	# In PIC mode the code must be linked at address 0
+	############################################################	 
+	CODE	(RX) :	ORIGIN = 0x00000000, LENGTH = 0x40000
+	DATA	(RW) :	ORIGIN = 0xa0060000, LENGTH = 0x20000
+}
+
+
+# In the following we have:
+#
+#	_ROM_size:		current total contribution to the ROM size
+#	_ROM_address:	current position to download the S-record
+ 	
+SECTIONS {
+
+	_ROM_size = 0;
+	_ROM_address = 0xa0020000;
+	__loadaddress (A) = 0xa0020000;
+		
+
+	
+	# By default use the current virtual address for ROM address
+
+	..code : AT (_ROM_address)
+	{
+		_ftext = .;
+
+		############################################################
+		# This is only needed for C++.  The code for the static 
+		# initializers belongs to the .init section.  This code is 
+		# executed only once, and can be executed from ROM.
+		############################################################
+
+		*	(.init)
+		
+		
+		*	(.text)			 
+		_etext = .;
+	
+	
+		# Include the .rodata section
+
+		*	(.rodata)
+
+
+		# Include the exception index section and the exception
+		# data.  All the exception tables can be kept in ROM.
+
+		__exception_table_start__ (A) = .;
+		EXCEPTION			# Only needed in C++
+		__exception_table_end__ (A) = .;
+		*	(.exception)
+			
+		. = ALIGN(8);
+	} > CODE
+	
+	
+	# Add the contribution of the ..code section
+
+	_ROM_size = _ROM_size + SIZEOF(..code);
+	_ROM_address = _ROM_address + SIZEOF(..code);
+	
+	
+	# Link the .sdata and .sbss section at address 0 and set GP
+	# to point 32K past the beginning of this section.  This section
+	# will be loaded just after the .text section
+	
+	..sdata :
+	{
+		# The .sbss section MUST follow the .sdata section and 
+		# _gp must point 32K inside the .sdata section.  This 
+		# is required by the ABI.  Note _gp is the only symbol
+		# known to the linker.  Do not change the name.
+		
+		_fsdata = .;
+	
+			_gp = . + 0x00008000;
+	
+			LITERAL
+			. = ALIGN(0x8);
+
+			*	(.sdata)
+			. = ALIGN(0x8);
+	
+		_esdata = .;
+		
+		_fsbss = .;
+
+			*	(.sbss)
+			. = ALIGN(0x8);
+
+		_esbss = .;
+	} > DATA
+	
+	
+	# Link the .data and .bss section at the address just after 
+	# ..sdata and load it at _ROM_address
+	
+	..data :
+	{
+		# Put the rest of the data after the .sbss section.
+		
+		. = _esbss;	# Link at the address after .sbss
+		
+		_fdata = .;
+		*	(.data)
+		. = ALIGN(4);
+		
+
+		############################################################
+		# Table of pointer to the static initializers.  This is only
+		# needed for C++ programs.
+		############################################################
+
+		__static_init (A) = .;
+		*	(.ctor)
+		__static_init_end (A) = .;
+	
+				
+		############################################################
+		# In PIC or PID mode the compiler generate 2 list of 
+		# relocations that have to be performed at runtime.  This is
+		# needed for constructs that are initialized with what 
+		# should an absolute address.  For example:
+		#
+		#	extern int foo;
+		#	int *pfoo = &foo;
+		#
+		# For such a construct the compiler generates an object 
+		# called .pid_pfoo in the section .piddynrel.  The .pid_pfoo
+		# object contains a list of addresses where a runtime 
+		# relocation must be applied on the object pfoo.
+		#
+		############################################################
+
+		__dynrelopic (A) = .;
+		*	(.picdynrel)
+		__dynrelopic_end (A) = .;
+
+		__dynrelopid (A) = .;
+		*	(.piddynrel)
+		__dynrelopid_end (A) = .;
+
+
+		############################################################
+		# VTABLEs
+		#
+		# This part is only needed for C++
+		# In PIC/PID we need to put all these sections in a
+		# writable area.
+		############################################################
+	
+		*	(.vtables)
+
+
+		. = ALIGN(8);
+		_edata = .;
+
+		_fbss = .;
+			*	(.bss)
+			. = ALIGN(0x8);
+		_ebss = .;	
+		
+		
+		# Put the COMMON section at the end.  The Metrowerks MIPS
+		# C compiler do not generate COMMON sections, but they can 
+		# be found in imported libraries.
+		
+		*	(COMMON)
+	} >> DATA
+
+	
+	# Allocate some space for the stack.  The stack grows from 
+	# high addresses to low addresses.  It is OK for the stack 
+	# to overrun the ..init section as long as it does not 
+	# happen during startup time.
+	# Make sure the stack is 8 byte aligned
+	
+	_stack_addr = . + 0x20000;
+	_stack_addr = (_stack_addr + 15) & ~15;
+	
+
+	# Allocate space for the heap.
+	
+	_heap_addr = _stack_addr;		# This is used by MSL
+	_heap_end = _heap_addr + 400*1024;
+}
+

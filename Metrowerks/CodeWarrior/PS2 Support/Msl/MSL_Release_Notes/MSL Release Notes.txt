@@ -1,0 +1,1196 @@
+========================================================================
+Metrowerks MSL 5.1.xx Pro5 Patch 1 Release Notes 
+========================================================================
+
+Version: Metrowerks CodeWarrior 5.1.00 MSL Pro5 Patch 1
+Date:    August 12, 1999
+Authors: Vicki Scott, Michael Marcotty, Matt Fassiotto, Ron Liechty,
+         Howard Hinnant 
+                  
+========================================================================
+
+========================================================================
+New Features in This Version
+========================================================================
+
+*  __MSL__ identifier is 0x51xx.  This release is known as the Pro5
+   patch 1, build xx.  This number identifies MSL as Pro 5 major release 
+   id), Update 1 (minor release id), build xx - where xx is the build
+   identifier at the time of release.
+   
+*  __MSL_CPP__ identifier for the C++ library is 0x51xx.  Since we
+   release patches for the various components of the library package, 
+   we wish to identify each one separately.
+
+*  __reopen added so that the Standard streams can be opened in
+   binary mode.  Please note that this is not an ANSI Standard 
+   function.
+   
+*  printf and scanf were updated to reflect C9X more closely (see 
+   notes below on the modifications made in the C library to for
+   printf.c and scanf.c)
+
+*  strftime modifiers updated to C9X
+
+*  Beta release of single precision AMD standard C math library.
+   This library has now been fully validated and replaces the double
+   precision library whenever the type float is used in any expression
+   passed to the function.
+
+
+   Note: tgmath.h is not meant as a standalone header.  It is currently 
+   only to support the use of the amd library as the default.  The 
+   benefit of providing overloads to the standard C functions in math.h 
+   is to make it so you don't have to change your code.  For example, 
+   if you have the lines:
+
+        float x=2.0f,y;
+        y=sqrt(x);
+
+   you will pick up the faster single precision version of sqrt without 
+   having to modify your source code to a "new" function call(in this case 
+   sqrtf).
+   
+   Because these functions "overload" the standard double functions(
+   i.e. have the same name but different signatures), there is a slight
+   change in invoking a function pointer to one of these.  You now have
+   to specify the signature when declaring a function pointer to avoid
+   ambiguity.
+   
+   Example:
+      
+       float *fp=&sqrt ;
+       double *dp=&sqrt ;
+       
+       must now be changed to:
+       
+       float *fp(float)=&sqrt ;
+       double *dp(double)=&sqrt ;
+       
+       
+        
+
+========================================================================
+Reported Bugs Fixed in This Version
+========================================================================
+
+This section describes user reported bugs that have been closed.  
+Additional bug closures and enhancements are reported in other sections 
+of this report.
+
+*  sscanf (mac, win32))
+   Early termination of input (i.e., fewer input tokens than formatters
+   accounted for) caused sscanf to return zero, but also updated the
+   supplied memory for their values
+   
+*  stat_win32.c (win32)
+   Fixed a bug when using FindClose where a pointer to a struct was
+   passed as the argument instead of a handle.
+    
+
+========================================================================
+Known Bugs and Incompatibilities
+========================================================================
+
+*  The following known problems exist in the AMD single precision math
+   library.  We are working toward fixing these:
+
+   1. sqrt-- as many as the last two bits differ from the correctly 
+      rounded result.
+
+   2. some of these may actually be slower than the standard double 
+      version. atanf and fmodf are slower or as slow as their double
+      counterparts. 
+
+*  Multibyte routines not implemented - targeted for Pro6 
+
+*  For the debug targets in MSL, we suggest you turn inlining off and
+   set the browser information on for the library you will be using 
+   during debug.  You will need to recompile the library target.
+   
+
+========================================================================
+Additional Notes
+========================================================================
+
+Disclaimer:
+
+This library represents a major step forward in providing fully Standard
+compliant C and C++ libraries.  We strongly desire to be responsive to
+users' requests and needs; however, our position is that we uphold and
+implement the Standards behavior in both the C and C++ libraries.  If a
+behavior was provided by MSL but goes against the Standard, we reserve
+the right to modify the behavior to comply fully with the Standard.  If,
+however, a behavior is unspecified or not specifically forbidden by the
+Standard, we will continue to support it in the library.  We reserve the 
+right to use our discretion in implementing non-standard and 
+non-specified C and C++ library behavior.
+
+===================================================================
+*  C++ Library Update
+===================================================================
+
+These release notes are relative to Pro 5 (MSL C++ 5.0xx)
+
+The Details
+===========
+
+<algobase.h>
+************
+
+This non-standard header has been removed.  Algorithms that were in
+this header now exist in <algorithm>.
+
+<algorithm>
+***********
+
+This header has been extensively modified.  It now contains all
+algorithms which were previously in <algorithm>, <algobase.h>, and
+<heap.h>.
+
+In general, there are no functional differences aside from size and
+speed optimizations, and the two items mentioned below.
+
+(IR9906-0919) Argument last1 of find_first_of had wrong type.
+
+random_shuffle now uses rand() from the C lib, so you can initialize
+it with srand().
+
+<bitset>
+********
+
+Generalized non-exception-throwing exceptional behavior to call the
+user-configurable __msl_error().
+
+Wrapped I/O methods up in #ifndef _MSL_NO_IO.
+
+<bstring.h>
+***********
+
+This non-standard header has been removed.  Use <string> instead.
+
+<cdeque>
+********
+
+Made iterator comparison functions global methods to allow easier
+comparisons between const_iterator and iterator.
+
+Generalized non-exception-throwing exceptional behavior to call the
+user-configurable __msl_error().
+
+Uninlined member templates when feasible.
+
+<complex>
+*********
+
+Wrapped I/O methods up in #ifndef _MSL_NO_IO.
+
+<deque>
+*******
+
+Made iterator comparison functions global methods to allow easier
+comparisons between const_iterator and iterator.
+
+Generalized non-exception-throwing exceptional behavior to call the
+user-configurable __msl_error().
+
+<extbasic.h>
+************
+
+This non-standard header has been removed.  This functionality has
+not been replaced.  If you need a good value for pi, I recommend:
+
+const double pi = 4. * atan(1.);
+
+<extfunc.h>
+***********
+
+This non-standard header has been removed.  The functionality herein
+is no longer required for <valarray>.
+
+<extmath.h>
+***********
+
+This non-standard header has been removed.  Use <cmath> or <math.h>
+instead.
+
+<fstream>
+*********
+
+Wrapped in #ifndef _MSL_NO_IO.  Altered switch statement in
+basic_filebuf<charT, traits>::open to account for the new behavior
+of ios_base::openmode.
+
+<functional>
+************
+
+This header has been extensively modified.  The following non-standard
+function objects have been removed:
+
+unary_compose
+binary_compose
+select1st
+select2nd
+ident
+
+If you need this functionality, #include the new non-standard header:
+<functional_ext>.  This functionality is provided by the SGI/HP
+implementation.  You will need to make the following minor modifications
+to your source:
+
+1.  Change headers.
+
+Change:
+
+#include <functional>
+
+to:
+
+#include <functional_ext>
+
+2.  select1st and select2nd are now templated on a single parameter
+(the pair).
+
+Change (for example):
+
+select1st<value_type, key_type>
+
+to:
+
+select1st<value_type>
+
+3.  ident has changed its name to identity, and is now templated on
+a single parameter.
+
+Change (for example):
+
+ident<value_type, key_type>
+
+to:
+
+identity<value_type>
+
+<hashfun.h>
+***********
+
+The hash_funX methods have been inlined.
+
+<hashmap.h>, <hashmmap.h>
+*************************
+
+Changed
+
+select1st<value_type, key_type>
+
+to:
+
+select1st<value_type>
+
+<hashset.h>, <hashmset.h>
+*************************
+
+Changed
+
+ident<value_type, key_type>
+
+to:
+
+identity<value_type>
+
+<hashtbl.h>
+***********
+
+#include <functional_ext> instead of <functional>.
+
+<heap.h>
+********
+
+This non-standard header has been removed.  Algorithms that were in
+this header now exist in <algorithm>.
+
+<iomanip>
+*********
+
+Wrapped in #ifndef _MSL_NO_IO.
+
+The non-standard helper objects imanip, omanip and smanip have been
+removed (actually they were removed in Pro 5 and this note was
+mistakenly missing from the Pro 5 release notes).
+
+Code that uses Xmanip can easily be converted to do without it.  Here
+is a converted Listing 18.33 from the Overloaded Manipulator section
+of our documentation:
+
+#include <iostream>
+#include <cstring>
+#include <cstdlib>
+#include <cctype>
+
+char buffer[80];
+char *Password = "Metrowerks";
+
+struct verify
+{
+	explicit verify(char* check) : check_(check) {}
+	char* check_;
+};
+
+char *StrUpr(char * str);
+std::istream& operator >> (std::istream& stream, const verify& v);
+
+int main()
+{
+using namespace std;
+
+	cin >> verify(StrUpr(Password));
+	cout << "Log in was Completed ! \n";
+
+	return 0; 
+}
+
+std::istream& operator >> (std::istream& stream, const verify& v) 
+{
+using namespace std;
+
+	short attempts = 3;
+
+	do {
+		cout << "Enter password: ";
+		stream >> buffer;
+
+		StrUpr(buffer);
+		if (! strcmp(v.check_, buffer)) return stream;
+		cout << "\a\a";
+		attempts--;
+	} while(attempts > 0);
+
+	cout << "All Tries failed \n";
+	exit(1);
+	return stream; 
+}
+
+char *StrUpr(char * str)
+{
+	char *p = str; // dupe string
+	while(*p) *p++ = static_cast<char>(std::toupper(*p));
+	return str;
+}
+
+In a nut shell, replace the global function verify with a struct
+named verify that will store the argument.  Change the name of:
+
+std::istream &verify_implement(std::istream &stream, char *check) 
+
+to:
+
+std::istream& operator >> (std::istream& stream, const verify& v) 
+
+And replace:
+
+		if (! strcmp(check, buffer)) return stream;
+
+with:
+
+		if (! strcmp(v.check_, buffer)) return stream;
+
+and you're done.  No changes necessary for client code (main)
+(ok, I did sneak a static_cast in there to get rid of an
+"implicit conversion" warning).
+
+<ios>
+*****
+
+This header has been extensively modified.  All bitmask types
+(fmtflags, iostate, openmode) will now result in their own type after
+binary bitwise operations.  For example, ios_base::in | ios_base::out
+results in an openmode, not an int.  This may effect some code that
+is expecting an int as the result.
+
+mutex objects have been removed from ios_base and basic_ios (see
+thread safety statement).
+
+Removed non-standard throwfailure() helper method.
+
+All data members of ios_base and basic_ios have been made private.
+
+Three non-standard protected helper methods have been added to
+ios_base:
+
+	void init(void* sb);
+	iostate& state();
+	void do_callbacks(event evnt);
+
+init() is to allow basic_ios::init to do its job without fiddling
+with ios_base's privates.
+
+state() is used by several derived classes that need to set the
+iostate without going through the public interfaces clear or setstate.
+
+do_callbacks() is to allow basic_ios::copyfmt to do its job without
+fiddling with ios_base's privates.
+
+Generalized non-exception-throwing exceptional behavior to call the
+user-configurable __msl_error().
+
+<iosfwd>
+********
+
+Wrapped in #ifndef _MSL_NO_IO.  
+
+<iostream>
+**********
+
+Wrapped in #ifndef _MSL_NO_IO.  
+
+<istream>
+*********
+
+Wrapped in #ifndef _MSL_NO_IO.
+
+Fixed bug in ignore to allow unlimited ignore when n is equal to
+numeric_limits<streamsize>::max().
+
+<iterator>
+**********
+
+This header has been extensively modified.  reverse_iterator and
+ostream_iterator no longer makes use of mutex objects (see thread
+safety statement).
+
+<limits>
+********
+
+Changed the definition of digits10 (subtracted 1) for all integral
+types.
+
+<list>
+******
+
+Made iterator comparison functions global methods to allow easier
+comparisons between const_iterator and iterator.
+
+Generalized non-exception-throwing exceptional behavior to call the
+user-configurable __msl_error().
+
+Uninlined member templates when feasible.
+
+<locale>
+********
+
+Wrapped in #ifndef _MSL_NO_IO.  
+
+Generalized non-exception-throwing exceptional behavior to call the
+user-configurable __msl_error().
+
+<memory>
+********
+
+This header has been extensively modified.
+
+The non-standard method contruct has been removed.  Use placement
+new intead.
+
+The non-standard methods destroy() have been renamed __destroy().
+
+The non-standard class _TempVec has been enhanced to handle both
+initialized and uninitialized memory internally.  This has made it
+useful to more algorithms in <algorithm>, simplifying the latter.
+
+The nested auto_ptr_ref struct of auto_ptr has been moved to namespace
+scope per proposed defect report 127
+(http://anubis.dkuug.dk/jtc1/sc22/wg21/docs/lwg-issues.html#127).
+Though this defect report has not been officially approved, I believe
+that it will in the near future.
+
+Installed _MSL_USE_AUTO_PTR_96 (see <mslconfig>).
+
+Also enabled as much of the member template operation for auto_ptr as
+our current compiler allows.
+
+<mlimits.h>
+***********
+
+This non-standard header has been removed.  Use <limits> instead.
+
+<mlocale.h>
+***********
+
+This non-standard header has been removed.  Use <locale> instead.
+
+<mslconfig>
+***********
+
+Updated __MSL_CPP__ to 0x5101.  Have moved _STD to here (from
+<ansi_parms.h>), and added _CSTD.  This pair of macros allows the
+std namespace to be turned on/off in the C and C++ headers seperately.
+
+Have added __msl_error().  This is a new feature for those wishing to
+use the C++ lib with exceptions turned off.  In the past, with
+exceptions turned off, the lib would call fprintf and abort upon an
+exceptional condition.  Now you can configure what will happen in such
+a case by filling out the definition of __msl_error().  Two example
+definitions are given:  call fprintf and abort, or do nothing at all.
+
+Added a new flag _MSL_USE_AUTO_PTR_96.  Defining this flag will disable
+the standard auto_ptr and enable the version of auto_ptr that appeared
+in the Dec. '96 CD2.
+
+Added a new flag _MSL_NO_REFCOUNT_STRING.  Defining this flag will
+change the implementation of basic_string to a non-refcounted version.
+This may have advantages in code size, or in multi-thread
+environments.  Or it may not.  We're giving you the choice.  The right
+answer is likely to depend upon your application.  You must recompile
+the C++ lib when changing this flag.
+
+<MSLstring.h>
+*************
+
+Inlined constructor that takes a const char*.
+
+<mtools.h>
+**********
+
+This non-standard header has been removed.  Several standard C and C++
+facilities offer this functionality.
+
+<mutex.h>
+*********
+
+Added error checking to the pthread version of mutex.
+
+Added Mac OS mutex.
+
+Added a "do nothing" mutex that can be used in a single-threaded lib.
+The intent is that you can use a mutex and not have to wrap it up in
+#ifdef _MSL_MULTITHREAD.
+
+<new>
+*****
+
+Changed message in bad_alloc::what() to "bad_alloc".
+
+Corrected incorrect use of _MSL_NO_THROW_SPECS in two places.
+
+<new_mem.h>
+***********
+
+This non-standard header has been removed.  There are no comparable
+allocators offered by MSL, but this technique has been moved into
+malloc (which new calls).
+
+<numeric>
+*********
+
+This header has been extensively modified.  However, there are no
+functional differences aside from size and speed optimizations.
+
+<ostream>
+*********
+
+Wrapped in #ifndef _MSL_NO_IO.
+
+<RefCountedPtrArray.h>
+**********************
+
+Generalized non-exception-throwing exceptional behavior to call the
+user-configurable __msl_error().
+
+<slist>, <slist.h>
+******************
+
+This non-standard header has been extensively modified and the guts
+have been moved from <slist.h> to <slist>.  <slist.h> now serves as a
+"using" header like the rest of the .h headers.
+
+The class slist is a singly linked list largely specified by SGI:
+
+http://www.sgi.com/Technology/STL/Slist.html
+
+Much of the interface, but not the implementation has been graciously
+contributed by SGI.  The interface of slist follows that of list very
+closely.  But some of the methods that are contant time for list end
+up being linear time for slist:  insert, erase, splice.  XXX_after
+versions of these methods have been added to the slist interface which
+are constant time:
+
+	iterator insert_after(iterator position, const T& x);
+	void     insert_after(iterator position, size_type n, const T& x);
+	template <class InputIterator>
+		void insert_after(iterator position, InputIterator first, InputIterator last);
+
+The insert_after methods insert the data **after** position instead of
+before.
+
+	iterator erase_after(iterator position);
+
+Erases (position, position+1], and returns position.
+
+	iterator erase_after(iterator position, iterator last);
+
+Erases (position, last], and returns position.
+
+	void splice_after(iterator position, slist& x);
+
+Splices x after position.  This method is not in the SGI interface.
+
+	void splice_after(iterator position, slist& x, iterator i);
+
+Splices (i, i+1] from x to *this after position.  This method is in
+the SGI interface, but the slist x is not passed as an argument.  The
+reason for this is that the SGI slist has a linear complexity
+slist::size() while the MSL slist::size() is constant time.  And thus
+the SGI slist does not need to keep track of the current size.
+
+	void splice_after(iterator position, slist& x, iterator first, iterator last);
+
+Splices (first, last] from x to *this after position.  This method is
+in the SGI interface, but the slist x is not passed as an argument.
+The reason for this is that the SGI slist has a linear complexity
+slist::size() while the MSL slist::size() is constant time.  And thus
+the SGI slist does not need to keep track of the current size.
+
+A few methods have been added that are not in the SGI interface:
+
+	iterator               last_node();      // returns --end() (constant time)
+	const_iterator         last_node() const;
+	void push_back(const value_type& x);
+
+Note that there is no pop_back().  If you want to do this you can
+erase(last_node()), but be forwarned that this is a linear time operation.
+
+<sstream>
+*********
+
+Wrapped in #ifndef _MSL_NO_IO.
+
+<streambuf>
+***********
+
+This header has been extensively modified.  basic_streambuf no longer
+makes use of mutex objects (see thread safety statement).
+
+All data members are now private instead of protected.
+
+<string>
+********
+
+Generalized non-exception-throwing exceptional behavior to call the
+user-configurable __msl_error().
+
+Wrapped I/O methods up in #ifndef _MSL_NO_IO.
+
+Added an optimization for null strings to share a static CharArray.
+
+Added a non-refcounted version of basic_string.  You can select this
+by defining _MSL_NO_REFCOUNT_STRING in <mslconfig>.  This may have
+advantages in code size or multi-threaded envirnoments.  Note that
+the refcounted version has a mutex to make it multi-thread safe.  It
+is not possible to have both the refcounted and non-refcounted
+versions active at the same time.
+
+Uninlined member templates when feasible.
+
+<strstream>
+***********
+
+Wrapped in #ifndef _MSL_NO_IO.
+
+<tree.h>
+********
+
+Placed debugging code under #ifdef _TREE_DEBUG.
+
+Disabled the copy constructor of __pointer_plus_bit.
+
+Made iterator comparison functions global methods to allow easier
+comparisons between const_iterator and iterator.
+
+Generalized non-exception-throwing exceptional behavior to call the
+user-configurable __msl_error().
+
+(IR9907-0888) Fixed bug in swap.  An empty tree triggered the bug.
+
+<utility>
+*********
+
+This header has been extensively modified.
+
+The non-standard objects triple and restrictor have been removed.
+
+<valarray>
+**********
+
+Generalized non-exception-throwing exceptional behavior to call the
+user-configurable __msl_error().
+
+Added static_cast in a few places to silence conversion warnings.
+
+<vector>
+********
+
+Generalized non-exception-throwing exceptional behavior to call the
+user-configurable __msl_error().
+
+MSL C++ Thread Safety Policy
+****************************
+
+(Note:  this section applies only to those platforms which supply
+thread safe OS calls).
+
+MSL C++ is Level-1 thread safe. That is:
+
+    1. It is safe to simultaneously call const and non-const methods
+       from different threads to distinct objects. 
+    2. It is safe to simultaneously call const methods, and methods
+       otherwise guaranteed not to alter the state of an object (or
+       invalidate outstanding references and iterators of a container)
+       from different threads to the same object. 
+    3. It is not safe for different threads to simultaneously access
+       the same object when at least one thread calls non-const
+       methods, or methods that invalidate outstanding references or
+       iterators to the object. The programmer is responsible for
+       using thread synchronization primitives (e.g. mutex) to avoid
+       such situations.
+
+Simultaneous use of allocators such as new and malloc are thread safe.
+
+Simultaneous use of global objects such as cin and cout is not safe.
+The programmer is responsible for using thread synchronization
+primitives to avoid such situations. MSL C++ provides an extension to
+standard C++ (std::mutex) to aid in such code. For example:
+
+       #include <iostream>
+       #include <iomanip>
+       #include <mutex.h>
+        
+       std::mutex cout_lock;
+        
+       int main()
+       {
+               cout_lock.lock();
+               std::cout << "The number is " << std::setw(5) << 20 << '\n';
+               cout_lock.unlock();
+       }
+
+Note that if only one thread is accessing a standard stream then no
+synchronization is necessary. For example, one could have one thread
+handling input from cin, and another thread handling output to cout,
+without worrying about mutex objects.
+
+The thread safety of MSL C++ can be controlled by the flag
+_MSL_MULTITHREAD in <mslconfig>. If you explicitly use std::mutex
+objects in your code, then they will become empty do-nothing objects
+when multi-threading is turned off (_MSL_MULTITHREAD is undefined).
+Thus the same source can be used in both single thread and multithread
+projects.
+
+The _MSL_MULTITHREAD flag causes some mutex objects to be set up in
+the library internals to protect data that is not obviously shared.
+For example, std::basic_string is refcounted. It is possible that two
+threads might each have their own basic_string, and that basic_string
+might share data among threads under the covers via the refcount
+mechanism. Therefore basic_string protects its refcount with a mutex
+object so that client code (even multi-threaded client code) can not
+detect that a refcounting implementation is in use.
+
+Rationale
+---------
+
+MT Safety, and it's definition is a driving force behind the design of
+an efficient, well designed C++ library. The C++ standard is almost
+completely mute on the subject:
+
+       17.4.4.5 Reentrancy [lib.reentrancy] 
+
+       1 Which of the functions in the C++ Standard Library are not
+         reentrant subroutines is implementation-defined.
+
+The decisions made for this design have been highly influenced by
+three references:
+
+    1. Ignatchenko, Sergey: "STL Implementations and Thread Safety",
+       C++ Report, July-August 1998. 
+    2. Thread_safety from the SGI STL documentation. 
+    3. Discussions from comp.std.c++ news group. 
+
+In all of these references, a clear and preferred definition of MT
+safety is best summarized by reference 1:
+
+       STL implementation is usually considered multithread safe if
+       the following conditions are met:
+
+           1. It is safe to simultaneously read and write accesses
+              from different threads to distinct containers. 
+           2. It is safe to simultaneously read accesses from
+              different threads to the same container. 
+           3. It is not safe for different threads to simultaneously
+              access the same container when at least one thread
+              writes to the container. The programmer is responsible
+              for using thread synchronization primitives (mutexex,
+              mutex-like objects, and so on) to avoid such situations. 
+
+All three references go on to argue against implementing thread safe
+simultaneous write access. It degrades performance too much (reference
+1 shows much worse than a factor of 2), and can lead to deadlock
+situations (reference 1).
+
+Reference 3 further points out that any attempted implementations of
+"thread safe simultaneous write access" are doomed to failure because
+of code sequences like the following:
+
+vector<int> s(...); // Let other threads share a reference to this vector
+s[1] = s[0]; // Not safe, no matter what!
+
+An attempted implementation of "thread safe simultaneous write access"
+would lock the vector inside of the vector::operator[] method.
+However, in this situation, this is the wrong granularity to lock on.
+If the thread is interrupted after the excecution of s[0], but before
+the execution of s[1], then the interrupting thread can change s[0],
+making the results of the original thread random (based on whether or
+not an interruption actually took place).
+
+Consider another example concerning I/O:
+
+       std::cout << "The number is " << std::setw(5) << 20 << '\n';
+
+Even if cout had an internal mutex object that locked, this would not
+make the above call to cout thread safe. The reason is that the above
+statement is actually 4 calls to cout. Each of the 4 calls could be
+made to be individually thread safe with an internal mutex, but there
+is no way to guarantee that all 4 calls are made without interruption
+without a mutex at the level of the client code.  Without client level
+synchronization such code will lead to scrambled output, and
+formatting applied to the wrong arguments.
+
+The conclusion is that the MT safe definition outlined above is not
+only prudent for performance reasons, but that anything more is
+impossible to obtain with the current interface of the standard C++
+library.
+
+
+
+===================================================================
+*  MSL C Library Updates 
+===================================================================
+
+Most of the changes for this patch are non-functional for the 
+desktop.  As we move to more and more embedded targets with a 
+single source base, many of the code changes reflect bug fixes 
+and code changes for these targets.  We supply the following list 
+of code changes for completeness, in the event you have modified 
+some of these sources in your own environment.  We have noted 
+where a bug fix is relevant for the desktop. 
+
+*  abort_exit.c
+   Added __emb_68k to the guard around call to _ExitProcess for
+   additional target.
+
+*  alloc.c
+   Added defines for mcore and n64 targets.  Fixed typos in 
+   embedded target code.
+
+*  ansi_files.c
+   Added _No_Console wrappers to accommodate targets with no
+   consoles.
+
+*  assert.c  <-- (win32, macos, embedded)
+   Changed file prototypes to add const to avoid complaints from 
+   compiler
+
+*  buffer_io.c
+   Added additional wrappers for embedded targets.
+
+*  file_io.c <-- (win32, macos, embedded)
+   Added __reopen function.  Users may now close the standard
+   streams and reopen them as binary.  This is not an ANSI 
+   function.
+
+*  float.c
+   Change long to _INT32; define _INT32 in msl_t.h.  This sets 
+   up for targets with different integer/long sizes.
+
+*  mbstring.c <-- (win32, macos, embedded)
+   Addition to prevent sign extension when assigning char to 
+   wchar; added _NO_WIDE_CHAR wrappers around functions that 
+   depend on wchar type.
+
+*  printf.c <-- (win32, macos)
+   Changes to bring more in line with C9X:
+     -  make the conversion specifications %lE, %le, %lG, and %lg be accepted 
+   		but ignore the 'l'
+     -  implement conversion specification %F
+   Add _NO_WIDE_CHAR, _No_Console wrappers; added n64 wrappers.
+
+*  scanf.c <-- (win32, macos, embedded)
+   Changes to bring more in line with C9X.
+     -  Implemented length modifiers hh and ll
+     -  Implemented conversion specification %lc
+     -  Implemented conversion specification %hhn
+     -  Make conversion specification %n work after end of input file
+   Fixed early input termination bug.
+   Corrected implementation of character scan set
+
+*  string.c <-- (win32, macos, embedded)
+   Change static int constants to a define - save space.
+   Add n64 wrappers.
+
+*  time.c <-- (win32, macos, embedded)
+   Added C9X conversion specifications: %T, %F, %u %g %G %V %z, %r, %R
+   The new C9X functionality now gives different behavior for %c, %p,
+   and %x.  See section C9X below for details.
+   
+*  wchar_io.c <-- (win32, macos, embedded)
+   Turn off ANSI_strict when wchar is not defined.  If wchar is
+   not defined, an empty compilation unit results.
+
+*  wcstold.c <-- (win32, macos, embedded)
+   Turn off ANSI_strict when wchar is not defined.  If wchar is
+   not defined, an empty compilation unit results.
+
+*  wcstoul.c <-- (win32, macos, embedded)
+   Turn off ANSI_strict when wchar is not defined.  If wchar is
+   not defined, an empty compilation unit results.
+
+*  wctrans.c <-- (win32, macos, embedded)
+   Turn off ANSI_strict when wchar is not defined.  If wchar is
+   not defined, an empty compilation unit results.
+
+*  wctype.c <-- (win32, macos, embedded)
+   Turn off ANSI_strict when wchar is not defined.  If wchar is
+   not defined, an empty compilation unit results.
+
+*  wmem.c <-- (win32, macos, embedded)
+   Turn off ANSI_strict when wchar is not defined.  If wchar is
+   not defined, an empty compilation unit results.  Fix signature  
+   for wmemcmp.
+
+*  wprint.c <-- (win32, macos, embedded)
+   Changes to bring more in line with C9X:
+     -  make the conversion specifications %lE, %le, %lG, and %lg be accepted 
+   		but ignore the 'l'
+     -  implement conversion specification %F
+     -  Implemented %ls and %lc
+     -  Implemented length modifiers hh and ll
+   Turn off ANSI_strict when wchar is not defined.  If wchar is
+   not defined, an empty compilation unit results.
+
+*  wscanf.c <-- (win32, macos, embedded)
+   Turn off ANSI_strict when wchar is not defined.  If wchar is
+   not defined, an empty compilation unit results.  Fixed bug in 
+   embedded targets.
+
+*  wstring.c <-- (win32, macos, embedded)
+   Turn off ANSI_strict when wchar is not defined.  If wchar is
+   not defined, an empty compilation unit results.
+
+*  wtime.c <-- (win32, macos, embedded)
+   Turn off ANSI_strict when wchar is not defined.  If wchar is
+   not defined, an empty compilation unit results.
+
+*  abort_exit.h
+   Added E68K guard
+
+*  ansi_files.h
+   Remove conflicting identifiers in prototypes
+
+*  ansi_parms.h <-- (win32, macos, embedded)
+   Fixed a bug in _STD macro for embedded; updated __MSL__;
+   added _MSL_C9X_ define
+
+*  buffer_io.h
+   Remove conflicting identifiers in prototypes
+
+*  cfloat
+   Change include of <cmath> to <msl_t.h>
+
+*  char_io.h
+   Remove conflicting identifiers in prototypes
+
+*  cinttypes
+   Change include of <cwchar> to <wchar_t.h>; add _NO_WIDE_CHAR
+   guards
+
+*  cmath <-- (win32, embedded)
+   Updates for AMD targets; new include of <msl_t.h>
+
+*  console_io.h
+   Added _No_Console guards for embedded targets
+
+*  critical_regions.h
+   Fixed a bug in prototype for embedded targets
+
+*  csetjmp
+   Updated for new embedded targets
+
+*  cstdarg
+   Added new embedded targets
+
+*  cstdio
+   Remove conflicting identifiers in prototypes
+
+*  cstdlib
+   Remove conflicting identifiers in prototypes, add _NO_WIDE_CHAR
+   guards for embedded
+
+*  file_io.h
+   Added prototype for __reopen
+
+*  msl_t.h
+   New header for defining types used in MSL for different platforms
+
+*  mslGlobals.h
+   Added new embedded targets
+
+*  os_enum.h
+   Added new embedded targets
+
+*  pool_alloc.h
+   Fix some bugs in the embedded targets, remove conflicting 
+   identifiers in prototypes
+
+*  string_io.h
+   Remove conflicting identifiers in prototypes
+
+*  tgmath.h
+   Update for AMD targets
+
+*  wchar_io.h
+   Remove conflicting identifiers in prototypes
+
+*  wcstoul.h
+   Function prototypes guarded with _NO_WIDE_CHAR
+
+*  wprintf.h
+   Remove conflicting identifiers in prototypes
+
+*  wscanf.h
+   Remove conflicting identifiers in prototypes
+
+*  wstdio.h
+   Remove conflicting identifiers in prototypes
+
+*  wtime.h
+   Remove conflicting identifiers in prototypes
+
+*  stat_win32.c
+   Fix problem with not passing a file handle in FindClose
+
+===================================================================
+*  WinSIOUX
+===================================================================
+  
+*  Please ensure that Winspool.lib is included in your WinSIOUX
+   project.
+
+===================================================================
+*  C9X Behavior
+===================================================================
+   
+We've introduced a new define in ansi_parms.h named _MSL_C9X_.
+This define does not guarantee full C9X compliance at this time;
+however, it will be used to migrate the differences between the
+ANSI 1989 C Standard and C9X.  This section specifies what behavior
+is determined by the use of this define.  If you do not want these
+changes in MSL in your applications, comment out the define in
+ansi_parms.h and recompile your library.
+
+*  time.c
+   Added C9X conversion specifications: 
+   %T equivalent to "%H:%M:%S"
+   %F equivalent to "%Y-%m-%d"
+   %u ISO 8601 weekday as a decimal number (1-7), Monday = 1
+   %g last 2 digits of the week-based year as a decimal number (00-99)
+   %G week-based year as a decimal number (e.g., 1999)
+   %V ISO 8601 week number as a decimal number (01-53)
+   %z offset from UTC in ISO 8601 format (e.g., -4601 means 4 hours,
+      30 minutes behind UTC, west of Greenwich); no characters are
+      given if no time zone is ascertainable
+   %r equivalent to "%I:%M:%S %p"
+   %R equivalent to "%H:%M"
+   %Z is not implemented in MSL
+
+   The new C9X functionality now gives different behavior for %c, %p,
+   and %x.  If you want the ANSI 1989 C functionality, you will need
+   to modify ansi_parms.h by commenting out the _MSL_C9X_ define and
+   recompiling the library.
+
+   %c equivalent to "%A %B %d %T %Y"
+   %c used to produce strings like:
+	Sunday, 02 December, 1979  06:55:16 PM
+   %c under C9X now produces strings like:
+	Sunday December 02 18:55:16 1979
+
+   %p one of "am" or "pm"
+   %p used to print AM/PM in upper case
+   %p under C9X now prints these in lower case
+
+   %x equivalent to "%T"
+   %x used to print strings like:
+	02 December, 1979
+   %x under C9X now produces strings like:
+	Sunday December 02 1979
+   
+===================================================================   
+Miscellaneous Notes
+===================================================================
+
+*  Precompiled header stationary sets precompiled headers to 4i-8d.  
+   When using precompiled headers built from the stationary, please 
+   ensure that the libraries you include in your project are also 
+   4i-8d. If changing the precompiled headers preferences panels, 
+   please ensure that you build the associated libraries you plan 
+   to use with the same options.  A "#pragma check_header_flags" 
+   has been added to MSL.pch++ to help check for these types of 
+   errors. 
+   
+*  Improved clock for Mac platforms
+   To increase the tick count for the Mac platforms in order to use 
+   the facilities the Operating System provides, please change the 
+   following file:  
+       Metrowerks Standard Library/MSL C/MSL Mac/Public Includes/
+              timesize.mac.h
+   This file introduces a define (__TIMESIZE_DOUBLE) which enables 
+   the improved clock code in time.h and time.mac.c.  Please note 
+   that the clock_t typedef will change from an unsigned long to a 
+   type double. This also means that the clock function will change 
+   types.  Be sure you confirm in your code base that your return 
+   values are typed accordingly for clock and clock_t.
+   
+*  Multi-target project files.  You will see new project files with 
+   the string MTrg included in the project name.  This means that 
+   the project file can emit all targets from that single file, 
+   depending on your selection when you open the project file and 
+   choose a target.  However, it takes more time to open the multi-
+   target project files.  This was done for the windows platforms 
+   because scripting is not available in the IDE on windows. 
+
+*  Console applications for windows projects now stop before exiting 
+   so that output can be viewed.  This feature can be turned off by 
+   setting the preprocessor macro STOP_PROGRAM_BEFORE_EXIT in the
+   windows prefix file, ansi_prefix.win32.h.  Be sure to rebuild
+   MSL C after making this change.  Please note that if you redirect 
+   output to a serial device (such as a printer), you must still 
+   press enter to  exit the program. 
+   
+
+========================================================================
+Contacting Metrowerks
+========================================================================
+
+For bug reports, technical questions, and suggestions, please use the
+forms in the Release Notes folder on the CD, and send them to
+
+    Technical Support    cw_support@metrowerks.com
+    Report Bugs:         cw_bug@metrowerks.com
+    Suggestions:         cw_suggestion@metrowerks.com
+
+See the CodeWarrior_on_the_Nets document in the Release Notes folder for
+more contact information, including a list of Internet newsgroups,
+online services, and factory update sites.
+
+========================================================================
+
+Metrowerks Corporation
+$Date: 1999/08/13 15:53:45 $ 
+$Revision: 1.11 $ 
+$NoKeywords: $ 

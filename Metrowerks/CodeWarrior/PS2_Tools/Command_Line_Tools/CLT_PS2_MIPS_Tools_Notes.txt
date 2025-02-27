@@ -1,0 +1,90 @@
+===========================================================================
+Metrowerks Command-Line Tools Release Notes
+===========================================================================
+
+Date:    April 11, 2000
+Authors: Ed Swartz, Stephen Chong
+	
+===========================================================================
+Usage and Configuration
+===========================================================================
+
+(General usage notes are in "CLT_Usage_Notes.txt".)
+
+For Embedded MIPS environment variables, OS is "PS2" and ARCH is "MIPS", 
+so the target-specific names are "MWCPS2MIPSIncludes" for the compiler, 
+and "MWPS2MIPSLibraries" and "MWPS2MIPSLibraryFiles" for the linker.
+
+===========================================================================
+Changes in This Version
+===========================================================================
+
+===========================================================================
+New Features in This Version
+===========================================================================
+
+1999/12/14:
+
+Added GCC-compatible options to the compiler for easier porting of 
+existing Makefiles.  This set of options is distinct from the standard
+Metrowerks options and must be explicitly enabled to be used.  
+
+The easiest way to enable these options is to use the initial option
+"--gcc-compat".  This must be the first option after the program name
+in order to recognized.  Use "mwccps2 --gcc-compat -help" to see how the
+options differ from the MW defaults ("mwccps2 -help").  Only those GCC
+options that already set the default PS2 machine options were
+included; all others will generate warnings (i.e., you cannot change
+the ISA level or processor).
+
+Metrowerks options that do not exist in GCC are still included in the
+GCC option set, to provide Metrowerks-specific functionality for more
+precise option selection.  Some of these MW options have been renamed
+from their standard names to avoid syntactical conflicts with some GCC
+options (for example, "-maxerrors xxx" is changed to "-cw_maxerrors xxx"
+since this would otherwise conflict with the GCC "-mXXX" option).
+
+An alternate way to select GCC options is to set the environment
+variable MWCL_GCC_COMPAT to some value other than unset, "off" or
+"no".  In this case, you can use the option "--mw-compat" to select
+Metrowerks options (since the default will be GCC options).
+
+The "--gcc-compat" and "--mw-compat" options will be passed to the linker
+when used by mwccps2.
+
+===========================================================================
+Bugs Fixed in This Version
+===========================================================================
+
+2000/04/11:
+
+Fixed a crash occurring in the command-line tool when dealing with .lit4/8
+sections.
+
+2000/03/22:
+
+Fixed -convertpaths option, whose default was implemented backwards,
+causing failure to find "-prefix" files with forward slashes.
+
+===========================================================================
+Known Bugs in This Version
+===========================================================================
+
+===========================================================================
+Contacting Metrowerks
+===========================================================================
+
+Use the forms found in the Release Notes folder on the CD to submit:
+
+    Technical Support    cw_support@metrowerks.com
+    Report Bugs:         cw_bug@metrowerks.com
+    Suggestions:         cw_suggestion@metrowerks.com
+
+See the CodeWarrior_on_the_Nets document in the Release Notes folder for
+more contact information, including a list of Internet newsgroups,
+online services, and factory update sites.
+
+===========================================================================
+Ed Swartz, Stephen Chong
+Metrowerks Command-Line Tools Engineers
+Metrowerks Corporation

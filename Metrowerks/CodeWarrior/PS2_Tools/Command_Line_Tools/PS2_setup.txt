@@ -1,0 +1,33 @@
+1. set the following environment paths:
+
+	PATH = <absolute path to command line tools>;  <absolute path to GNU command line tools>
+	MWCIncludes = <absolute path to GCC library headers as well as the MW PS2 Support folder>
+	MWLibraries = <absolute path the GCC library directories>
+	MWLibraryFiles = <semicolon seperated list of all libraries to be used>
+
+2. Drop the license file into the same directory as the command line tools.
+
+3. Use the CW provided custom LCF in the PS2 Support folder.  Drop into same directory as
+   the source files and pass to linker in your makefile.
+
+4. You'll need the gcc_wrapper.c for some of the projects.  Drop this into the same
+   directory of your source files. Or modify the MAKEFILE with a new rule to explicity
+   point to it.
+
+5. MAKEFILE modifications:
+   - comment out the SHELL rule.
+   - change the names of the compiler, linker to the CW compiler and linker.
+   - remove the gcc compiler flags that are incompatible (eg, -Wall, -Werror, -fno-common)
+   - remove the gcc linker flags that are incompatible (eg, -T, -Wl, -nostartfiles, arguments
+     passed to the -map option, "," )
+   - pass the prefix file to the CW compiler using the -prefix <name of file> option
+   - Replace the unix command 'rm' with 'del' in the rule for 'make clean'
+   - define the entrypoint for the final executable by passing -m ENTRYPOINT as an option
+     to the linker.
+
+6. Windows95 anomolies (ie, not NT) to be aware of:
+   - the 'rm' MAKEFILE rule is problematic.  Replace 'del' with 'command.com /c del'.  Or
+     just don't use 'make clean'.  The 'del' command doesn't seem to like multile arguments,
+     so '$(RM) *.o *.map' will not work. (I believe Steven has a work around to get this to work).
+   - make sure windows source files are of the same case as what's written in the makefile.
+   - ' > $*.lst ' to create a listing file is problematic.  Remove this.
